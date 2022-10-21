@@ -6,7 +6,7 @@ public class AirplaneMotor : IMotor
     {
         Vector3 waveMovement = new Vector3(transform.position.x, Mathf.Sin(1 * Time.time) * 2, transform.position.z);
         transform.position = waveMovement;
-        transform.Translate(Vector3.forward * Time.deltaTime * 3, Space.Self);
+        transform.Translate(Vector3.forward * Time.deltaTime * 5, Space.Self);
         Debug.Log("AirplaneMotor");
     }
 }
