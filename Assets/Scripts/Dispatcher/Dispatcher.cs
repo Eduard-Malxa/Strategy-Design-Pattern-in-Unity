@@ -1,3 +1,5 @@
+using ModestTree.Util;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -7,6 +9,8 @@ using Zenject;
 
 public class Dispatcher : MonoBehaviour
 {
+    [Inject] private DispatcherDescriptions dispatcherDescriptions;
+
     [Inject] private Airplane airplane;
     [Inject] private Car car;
     [Inject] private Bicycle bicycle;
@@ -23,30 +27,45 @@ public class Dispatcher : MonoBehaviour
     [SerializeField]
     private Button callBicycleButton;
 
+    private event Action OnArrivalAtLocation;
+
     private void Start()
     {
-        callAirplaneButton.onClick.AddListener(() => CallVehicle(airplane));
-        callCarButton.onClick.AddListener(() => CallVehicle(car));
-        callBicycleButton.onClick.AddListener(() => CallVehicle(bicycle));
+        OnArrivalAtLocation += OpenCallOptions;
+        callAirplaneButton.onClick.AddListener(() => CallTransport(airplane));
+        callCarButton.onClick.AddListener(() => CallTransport(car));
+        callBicycleButton.onClick.AddListener(() => CallTransport(bicycle));
     }
 
     private void OnDisable()
     {
+        OnArrivalAtLocation -= OpenCallOptions;
         callAirplaneButton.onClick.RemoveAllListeners();
         callCarButton.onClick.RemoveAllListeners();
         callBicycleButton.onClick.RemoveAllListeners();
     }
 
-    public void CallVehicle(Vehicle vehicle)
+    private void CallTransport(Transport vehicle)
     {
-        vehicle.ActivateMotor();
+        vehicle.InstantiateTransport();
+        vehicle.Enable();
+        dispatcherDescriptions.TransportSendedText(vehicle);
         CloseCallOptions();
     }
 
-    public async void CloseCallOptions()
+    private void CloseCallOptions()
     {
         canvasGroup.interactable = false;
-        await Task.Delay(5000);
+    }
+
+    private void OpenCallOptions()
+    {
         canvasGroup.interactable = true;
+    }
+
+    public void TransportArrived()
+    {
+        dispatcherDescriptions.TransportArrivedText();
+        OnArrivalAtLocation.Invoke();
     }
 }
